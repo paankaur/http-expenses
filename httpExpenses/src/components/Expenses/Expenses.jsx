@@ -22,19 +22,9 @@ const Expenses = (props) => {
   return (
     <Card className="expenses">
       <ExpensesFilter  onYearChange={yearChangeHandler} />
-      <ExpensesList expenses={filteredExpenses} />
+      <ExpensesList expenses={filteredExpenses} isLoading={props.isLoading} />
     </Card>
   );
 };
 
 export default Expenses;
-
-// {
-//   filteredExpenses.length === 0 && <p  >No thing here yet!</p>
-// }
-
-// {
-// filteredExpenses.map((expense) => (
-//   <ExpenseItem key={expense.id} data={expense} />
-// ))
-// }
