@@ -4,8 +4,9 @@ import React from "react";
 import Expenses from "./components/Expenses/Expenses.jsx";
 import NewExpense from "./components/NewExpense/NewExpense.jsx";
 import { useState, useEffect } from "react";
+import Error from "./components/UI/Error.jsx";
 
-const DUMMY_EXPENSES = [
+/* const DUMMY_EXPENSES = [
   {
     id: 1,
     date: new Date(2025, 1, 25),
@@ -30,23 +31,42 @@ const DUMMY_EXPENSES = [
     title: "New Banana",
     price: 9.79,
   },
-];
+]; */
 
 const App = () => {
   const [expenses, setExpenses] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState(null);
+  const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     const getExpenses = async () => {
       setIsFetching(true);
-      const response = await fetch("http://localhost:3005/expenses");
-      const responseData = await response.json();
-      setExpenses(responseData.expenses);
+      try {
+        const response = await fetch("http://localhost:3005/expenses");
+        const responseData = await response.json();
+        if (!response.ok) {
+          throw new Error("Failed fetching data..");
+        }
+        setExpenses(responseData.expenses);
+      } catch (error) {
+        setError({
+          title: "An error occurred",
+          message: "Failed fetching expenses data, please try again later",
+        });
+        setShowError(true);
+      }
       setIsFetching(false);
     };
     getExpenses();
     console.log(expenses);
   }, []);
+
+  console.log(error);
+  const errorHandler = () => {
+    setError(null);
+    setShowError(false);
+  };
 
   useEffect(() => {
     localStorage.setItem("expenses", JSON.stringify(expenses));
@@ -60,6 +80,13 @@ const App = () => {
 
   return (
     <div className="App">
+      {showError && (
+        <Error
+          title={error.title}
+          message={error.message}
+          onConfirm={errorHandler}
+        />
+      )}
       <NewExpense onAddExpense={addExpenseHandeler}></NewExpense>
       <Expenses expenses={expenses} isLoading={isFetching} />
     </div>
